@@ -1,5 +1,5 @@
 """
-ONNX Model Converter
+ONNX Model Converter (Alternative using keras2onnx)
 """
 
 import tensorflow as tf
@@ -11,35 +11,33 @@ def convert_to_onnx(
 ):
     """
     Convert model to ONNX format for cross-platform deployment
-    Requires: tf2onnx library
+    Requires: keras2onnx library
     """
     try:
-        import tf2onnx
+        import keras2onnx
         import onnx
         
         # Load model
         model = tf.keras.models.load_model(model_path)
         
         # Convert to ONNX
-        spec = (tf.TensorSpec((None, 128, 128, 3), tf.float32, name="input"),)
-        output_path_full = output_path
-        
-        model_proto, _ = tf2onnx.convert.from_keras(
+        onnx_model = keras2onnx.convert_keras(
             model,
-            input_signature=spec,
-            opset=13,
-            output_path=output_path_full
+            name='plant_disease_model',
+            target_opset=13
         )
         
-        print(f"ONNX model saved to {output_path_full}")
+        # Save ONNX model
+        onnx.save_model(onnx_model, output_path)
+        
+        print(f"ONNX model saved to {output_path}")
         
         # Verify ONNX model
-        onnx_model = onnx.load(output_path_full)
         onnx.checker.check_model(onnx_model)
         print("ONNX model verified successfully")
         
-        return output_path_full
+        return output_path
     
     except ImportError:
-        print("tf2onnx not installed. Install with: pip install tf2onnx onnx")
+        print("keras2onnx not installed. Install with: conda install -c conda-forge keras2onnx onnx")
         return None
