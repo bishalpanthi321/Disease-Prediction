@@ -1,0 +1,47 @@
+name: plant_disease_app
+description: AI-powered plant disease detection mobile app
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.2
+
+  # Image Handling
+  image_picker: ^0.8.7+5
+  image: ^4.0.17
+
+  # ML/AI
+  tflite_flutter: ^0.10.1
+
+  # Networking
+  http: ^0.13.6
+
+  # Database
+  sqflite: ^2.2.8+4
+  path_provider: ^2.0.15
+
+  # Storage
+  shared_preferences: ^2.1.2
+
+  # Location
+  geolocator: ^9.0.2
+
+  # Connectivity
+  connectivity_plus: ^4.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/models/plant_disease_model.tflite
