@@ -55,7 +55,6 @@ class ImagePickerWidget extends StatelessWidget {
                   title: Text('Remove Image'),
                   onTap: () {
                     Navigator.pop(context);
-                    // You can add logic to clear the image here
                   },
                 ),
             ],
