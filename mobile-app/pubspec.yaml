@@ -14,7 +14,7 @@ dependencies:
 
   # Image Handling
   image_picker: ^0.8.7+5
-  image: ^4.0.17
+  image: 3.0.2
 
   # ML/AI
   tflite_flutter: ^0.10.1
@@ -33,7 +33,7 @@ dependencies:
   geolocator: ^9.0.2
 
   # Connectivity
-  connectivity_plus: ^4.0.1
+  connectivity_plus: ^2.1.0
 
 dev_dependencies:
   flutter_test:

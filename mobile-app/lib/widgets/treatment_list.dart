@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TreatmentList extends StatelessWidget {
-  final List<dynamic> treatments;
+  final List<Map<String, dynamic>> treatments;
 
   const TreatmentList({
     Key? key,
@@ -13,11 +13,11 @@ class TreatmentList extends StatelessWidget {
     if (treatments.isEmpty) {
       return Card(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(Icons.info_outline, color: Colors.grey),
-              SizedBox(width: 12),
+              const Icon(Icons.info_outline, color: Colors.grey),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'No treatment suggestions available for this disease.',
@@ -34,12 +34,12 @@ class TreatmentList extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ExpansionTile(
-        leading: Icon(Icons.healing, color: Colors.green),
+        leading: const Icon(Icons.healing, color: Colors.green),
         title: Text(
           'Treatment Options (${treatments.length})',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        subtitle: Text('Tap to view recommendations'),
+        subtitle: const Text('Tap to view recommendations'),
         children: treatments
             .map((treatment) => TreatmentItem(treatment: treatment))
             .toList(),
@@ -55,103 +55,108 @@ class TreatmentItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isOrganic = treatment['type'] == 'organic';
-    final effectiveness = (treatment['effectiveness'] as num).toDouble();
+    final isOrganic = treatment['type']?.toString().toLowerCase() == 'organic';
+    final effectiveness =
+        (treatment['effectiveness'] as num?)?.toDouble() ?? 0.0;
+    final costEstimate = treatment['cost_estimate']?.toString() ?? 'N/A';
+    final dosage = treatment['dosage']?.toString() ?? 'N/A';
+    final application = treatment['application_method']?.toString() ?? 'N/A';
+    final sideEffects = (treatment['side_effects'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
 
     return InkWell(
-      onTap: () => _showTreatmentDetails(context),
+      onTap: () => _showTreatmentDetails(
+        context,
+        treatmentName: treatment['name']?.toString() ?? 'Unknown',
+        isOrganic: isOrganic,
+        dosage: dosage,
+        cost: costEstimate,
+        effectiveness: effectiveness,
+        application: application,
+        sideEffects: sideEffects,
+      ),
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(color: Colors.grey.shade200),
           ),
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                // Type Icon
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isOrganic ? Colors.green.shade50 : Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
+            // Type Icon
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color:
+                    isOrganic ? Colors.green.shade50 : Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                isOrganic ? Icons.eco : Icons.science,
+                color: isOrganic ? Colors.green : Colors.blue,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    treatment['name']?.toString() ?? 'Unknown Treatment',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  child: Icon(
-                    isOrganic ? Icons.eco : Icons.science,
-                    color: isOrganic ? Colors.green : Colors.blue,
-                    size: 24,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 4),
+                  Row(
                     children: [
+                      _buildChip(
+                          treatment['type']?.toString().toUpperCase() ?? 'N/A',
+                          isOrganic ? Colors.green : Colors.blue),
+                      const SizedBox(width: 8),
                       Text(
-                        treatment['name'],
+                        costEstimate,
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Row(
-                        children: [
-                          _buildChip(
-                            treatment['type'].toString().toUpperCase(),
-                            isOrganic ? Colors.green : Colors.blue,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            '\${treatment['cost_estimate']}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade700,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
+                ],
+              ),
+            ),
+            // Effectiveness Badge
+            Column(
+              children: [
+                CircularProgressIndicator(
+                  value: effectiveness,
+                  strokeWidth: 3,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    effectiveness > 0.8
+                        ? Colors.green
+                        : effectiveness > 0.6
+                            ? Colors.orange
+                            : Colors.red,
+                  ),
                 ),
-                // Effectiveness Badge
-                Column(
-                  children: [
-                    CircularProgressIndicator(
-                      value: effectiveness,
-                      strokeWidth: 3,
-                      backgroundColor: Colors.grey.shade200,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        effectiveness > 0.8
-                            ? Colors.green
-                            : effectiveness > 0.6
-                                ? Colors.orange
-                                : Colors.red,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      '${(effectiveness * 100).toInt()}%',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 4),
+                Text(
+                  '${(effectiveness * 100).toInt()}%',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Dosage: ${treatment['dosage']}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-              ),
             ),
           ],
         ),
@@ -161,7 +166,7 @@ class TreatmentItem extends StatelessWidget {
 
   Widget _buildChip(String label, Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(4),
@@ -178,11 +183,20 @@ class TreatmentItem extends StatelessWidget {
     );
   }
 
-  void _showTreatmentDetails(BuildContext context) {
+  void _showTreatmentDetails(
+    BuildContext context, {
+    required String treatmentName,
+    required bool isOrganic,
+    required String dosage,
+    required String cost,
+    required double effectiveness,
+    required String application,
+    required List<String> sideEffects,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => DraggableScrollableSheet(
@@ -192,7 +206,7 @@ class TreatmentItem extends StatelessWidget {
         expand: false,
         builder: (context, scrollController) => SingleChildScrollView(
           controller: scrollController,
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -207,88 +221,64 @@ class TreatmentItem extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
-
+              const SizedBox(height: 20),
               // Title
               Text(
-                treatment['name'],
-                style: TextStyle(
+                treatmentName,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               _buildChip(
-                treatment['type'].toString().toUpperCase(),
-                treatment['type'] == 'organic' ? Colors.green : Colors.blue,
+                isOrganic ? 'ORGANIC' : 'CHEMICAL',
+                isOrganic ? Colors.green : Colors.blue,
               ),
-              Divider(height: 32),
-
+              const Divider(height: 32),
               // Details
+              _buildDetailRow(Icons.medication, 'Dosage', dosage),
+              _buildDetailRow(Icons.attach_money, 'Estimated Cost', cost),
               _buildDetailRow(
-                Icons.medication,
-                'Dosage',
-                treatment['dosage'],
-              ),
-              _buildDetailRow(
-                Icons.attach_money,
-                'Estimated Cost',
-                '\${treatment['cost_estimate']}',
-              ),
-              _buildDetailRow(
-                Icons.timeline,
-                'Effectiveness',
-                '${(treatment['effectiveness'] * 100).toInt()}%',
-              ),
-              _buildDetailRow(
-                Icons.agriculture,
-                'Application',
-                treatment['application_method'],
-              ),
-
-              SizedBox(height: 24),
-
+                  Icons.timeline, 'Effectiveness', '${(effectiveness * 100).toInt()}%'),
+              _buildDetailRow(Icons.agriculture, 'Application', application),
+              const SizedBox(height: 24),
               // Side Effects
-              Text(
+              const Text(
                 'Side Effects',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 12),
-              ...List<Widget>.from(
-                (treatment['side_effects'] as List).map(
-                  (effect) => Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.fiber_manual_record,
-                            size: 8, color: Colors.grey),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            effect,
-                            style: TextStyle(fontSize: 14),
-                          ),
+              const SizedBox(height: 12),
+              ...sideEffects.map(
+                (effect) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.fiber_manual_record, size: 8, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          effect,
+                          style: const TextStyle(fontSize: 14),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-
-              SizedBox(height: 24),
-
+              const SizedBox(height: 24),
               // Close Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('Close'),
+                  child: const Text('Close'),
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -304,12 +294,12 @@ class TreatmentItem extends StatelessWidget {
 
   Widget _buildDetailRow(IconData icon, String label, String value) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 20, color: Colors.blue),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,10 +312,10 @@ class TreatmentItem extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),

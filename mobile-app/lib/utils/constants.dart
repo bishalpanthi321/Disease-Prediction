@@ -6,7 +6,7 @@ class AppConstants {
   // Model Configuration
   static const String MODEL_PATH = 'plant_disease_model.tflite';
   static const int IMAGE_SIZE = 128;
-  static const int NUM_CLASSES = 3
+  static const int NUM_CLASSES = 3;
   
   // Database Configuration
   static const String DB_NAME = 'plant_disease.db';
